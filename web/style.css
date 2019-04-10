@@ -1,0 +1,82 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Feb 14, 2019, 6:54:52 PM
+    Author     : Tyler
+*/
+
+body { 
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 85%;
+    margin-left: 2em;
+    margin-right: 2em;
+    width: 400px;
+}
+h1 {     
+    font-size: 140%;
+    color: teal;
+    margin-bottom: .5em;    
+}
+h2 {     
+    font-size: 140%;
+    color: teal;
+    margin-bottom: .5em;    
+}
+.leftHeading {
+    font-weight: bold;
+    float: left;
+    margin-right: 2em;
+    text-align: left;
+    width: 7em;
+}
+
+#button1 {
+    width: 5em;
+}
+
+.rightButton {
+
+    text-align: right;
+}
+
+form {
+    display: inline-block;
+}
+
+table {
+    border-collapse: collapse;
+    width: 70%;
+    font-family: sans-serif;
+    font-weight: normal; 
+}
+
+td, th {
+    font-weight: normal;
+    border: 1px solid black;
+    text-align: left;
+    padding: 8px;
+}
+
+a:link{
+    color: blue;
+    background-color: transparent;
+    text-decoration: none;
+}
+a:visited{
+    color: purple;
+    background-color: transparent;
+    text-decoration: none;
+}
+a:hover{
+    color: red;
+    background-color: transparent;
+    text-decoration: underline;
+}
+a:active{
+    color: yellow;
+    background-color: transparent;
+    text-decoration: underline;
+}

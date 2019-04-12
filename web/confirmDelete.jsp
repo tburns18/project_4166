@@ -19,6 +19,14 @@
             <p>You are currently logged in as: <c:out value="${user.fName} ${user.lName}"/></p>
             <a href="membership?action=logout">User Logout</a>
         </c:if>
+            <c:choose>
+            <c:when test="${user.fName != null}">
+                 <c:out value="${user.lName}"/></p>-->
+            </c:when>
+                <c:otherwise>
+                    <c:redirect url="/login.jsp"/>
+                </c:otherwise>
+        </c:choose>
             
         <h1>Are you sure you want to delete this product?</h1>
         
@@ -31,8 +39,8 @@
 
             <%-- Form to Delete the product --%>
             <form action="productManagement" method="get"> 
-                <input type="hidden" name="action" value="deleteProduct">
-                <input type="hidden" name="productCode" value="<c:out value="${product.itemCode}"/>">
+                <input type="hidden" name="action" value="actuallyDelete">
+                <input type="hidden" name="itemCode" value="<c:out value="${product.itemCode}"/>">
                 <input type="submit" value="Yes" id="button1">
             </form>
 

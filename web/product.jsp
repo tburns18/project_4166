@@ -18,21 +18,42 @@
             <p>You are currently logged in as: <c:out value="${user.fName} ${user.lName}"/></p>
             <a href="membership?action=logout">User Logout</a>
         </c:if>
+        <c:choose>
+            <c:when test="${user.fName != null}">
+                <c:out value="${user.lName}"/>
+            </c:when>
+            <c:otherwise>
+                <c:redirect url="/login.jsp"/>
+            </c:otherwise>
+        </c:choose>
             <h2>Product</h2>
            
-        <c:out value="${error}" />
-        <form action="productManagement?action=displayProducts" method="POST">
-            <label> Code: </label>
-            <input type="text" name="code" value="${product.code}"/> <br />
-            <label> Description: </label>
-            <textarea name="description" height="50px;">${product.description}</textarea> <br />
-            <label> Price: </label>
-            <input type="text" name="price" value="${product.price}"/> <br />
-            
-            <input type="hidden" name="action" value="addProduct"/>
-            <input type="submit" value="Add Product" />
+        <form action="productManagement" method="post">
+            <p>    
+                <label class="leftHeading">Code</label>
+                <input type="text" name="code" value="<c:out value="${product.itemCode}"/>">
+            </p>
+
+            <p>
+                <label class="leftHeading">Description</label>
+                <textarea rows="4" cols="25" name="desc"> <c:out value="${product.itemDescription}"/>
+                </textarea>
+            </p>
+
+            <p>
+                <label class="leftHeading">Price</label>
+                <input type="text" name="price" value="<c:out value="${product.itemPrice}"/>">
+            </p>
+
+            <div class="rightButton">
+                <input type="hidden" name="action" value="addProduct">          
+                <input type="submit" value="Add Product">
+
+            </div>
         </form>
-            
-            <a href="productManagement?action=displayProducts"> <button class="left"> View All Products </button></a>
+            <form action ="productManagement" method ="get">
+                <input type ="hidden" name="action" value="displayProducts">
+                <input type ="submit" value ="View Products">
+            </form>
     </body>
 </html>

@@ -65,28 +65,23 @@ public class MembershipServlet extends HttpServlet {
 
         //Get action parameter
         String action = request.getParameter("action");
-        HttpSession session = request.getSession();
         String url = "/index.jsp";
         //Make a big decision
-        if (!action.isEmpty() || action != null) {
-            if (action.equals("login")) {
-                // If action is equal to login go to login.jsp
-                url = "/login.jsp";
-            } else if (action.equals("signup")) {
-            // If action is equal to signup go to signup.jsp
-                url = "/signup.jsp";
-            } 
-            else if (action.equals("logout")) {
-                // invalidates the session
-                session.removeAttribute("user");
-                session.invalidate();
-                url = "/index.jsp";
-            }
-             getServletContext()
-                .getRequestDispatcher(url)
-                .forward(request, response);
+        if(action.equals("login")){
+            url = "/login.jsp";
+            request.getServletContext().getRequestDispatcher("/login.jsp").forward(request,response);
+            doPost(request,response);
         }
-        processRequest(request, response);
+        else if(action.equals("signup")){
+            url = "/signup.jsp";
+            request.getServletContext().getRequestDispatcher("/signup.jsp").forward(request, response);
+            doPost(request,response);
+        }
+        else if(action.equals("logout")){
+            HttpSession session = request.getSession();
+            session.invalidate();
+            request.getServletContext().getRequestDispatcher("/index.jsp").forward(request,response);
+        }
     }
     
 
@@ -101,12 +96,28 @@ public class MembershipServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        //Get the action and session
+        
+        
         String action = request.getParameter("action");
         HttpSession session = request.getSession();
-        String url = "/index.jsp";
-
+        
+        if(action.equals("signup")){
+            
+        User user = new User();
+            
+        String fName = request.getParameter("fName");
+        String lName = request.getParameter("lName");
+        String email = request.getParameter("email");
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        
+        user.setfName(fName);
+        user.setlName(lName);
+        user.setEmail(email);
+        user.setUsername(username);
+        user.setPassword(password);
+        
+        if(fName.isEmpty() || lName.isEmpty() || (email.isEmpty() || !(email.contains("@")))){
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
@@ -116,63 +127,90 @@ public class MembershipServlet extends HttpServlet {
             out.println("</head>");
             out.println("<body>");
             out.println("<h1>Membership Servlet</h1>");
-
-           
-            if (action.equals("login")) {
-                // Validate user
-                String email = request.getParameter("email").trim();
-                String password = request.getParameter("password").trim();
-                User user = (User) session.getAttribute("user");
-                if (email.isEmpty()) {
-                    //Didn't provide a username
-                    out.println("<p>Username is invalid.</p>");
-                } else if (email == null ||!email.equals(user.getEmail())) {
-                    //user didn't match any user in the text file
-                    out.println("User does not exist");
-                } else if (password == null || !password.equals(user.getPassword())) {
-                    //password didn't match
-                    out.println("<p>Incorrect Password.</p>");
-                } else {
-                    //valid user, so go to display products
-                    url = "/products.jsp";
-                    out.println("<p>Successfully logged in " + user.getfName() + " " + user.getlName() + "</p>");
-                    out.println("<p><a href=\"index.jsp\">Return to Index</a></p>");
-                }
+            if(fName.isEmpty()){
+                out.println("<p>Enter a first name.</p>");
+            }
+            if(lName.isEmpty()){
+                out.println("<p>Enter a last name.</p>");
+            }
+            if(email.isEmpty() || !(email.contains("@"))){
+                out.println("<p>Enter a valid email address.</p>");
                 
-               
-            } else if ("signup".equals(action)) {
-
-                //Validate Method will print out error if any of the input from parameters is invalid
- 
-                
-                //Get the parameters
-                String fName = request.getParameter("fName");
-                String lName = request.getParameter("lName");
-                String email = request.getParameter("email");
-                String password = request.getParameter("password");
-
-                //Create new user object and put the information in it
-                User user = new User();
-                user.setEmail(email);
-                user.setfName(fName);
-                user.setlName(lName);
-                user.setPassword(password);
-
-                //Put user object into session attribute
-                session.setAttribute("user", user);
-                getServletContext().getRequestDispatcher("/products.jsp").forward(request, response);
-                
-
-                out.println("<p>Successfully created new user " + user.getfName() + "</p>");
-                out.println("<p><a href=\"index.jsp\">Return to Index</a></p>");
-
+            }
             out.println("</body>");
             out.println("</html>");
+            
         }
-        getServletContext().getRequestDispatcher(url).forward(request, response);
+        }
+        else if(username.isEmpty() || password.length() <= 8){
+            try (PrintWriter out = response.getWriter()){
+                out.println("<!DOCTYPE html>");
+                out.println("<html>");
+                out.println("<head>");
+                out.println("<title>Servlet MembershipControllerServlet</title>");
+                out.println("</head>");
+                out.println("<body>");
+                out.println("<h1>Membership Servlet</h1>");
+                if(username.isEmpty()){
+                    out.println("<p>Enter a username</p>");
+                }
+                if(password.length()<= 8){
+                    out.println("<p>Password must be at least 8 characters</p>");
+                }
+                out.println("</body>");
+                out.println("</html>");
+            }
+        }
         
+    
+            session.setAttribute("user", user);
+            request.getServletContext().getRequestDispatcher("/login.jsp").forward(request, response);
+            
+        }else if(action.equals("login")){
+            
+                
+             
+                User loggedUser = new User();
+                String loggedEmail = request.getParameter("email");
+                String loggedPassword = request.getParameter("password");
+                
+                
+                
+                User user = (User)session.getAttribute("user");
+                if(loggedEmail.isEmpty() || loggedPassword.isEmpty()) {
+                    try (PrintWriter out = response.getWriter()){
+                        out.println("<!DOCTYPE html>");
+                        out.println("<html>");
+                        out.println("<head>");
+                        out.println("<title>Servlet MembershipControllerServlet</title>");
+                        out.println("</head>");
+                        out.println("<body>");
+                        out.println("<h1>Membership Servlet</h1>");
+                        if(loggedEmail.isEmpty()){
+                            out.println("<p>Enter your email</p>");
+                        }
+                        if(loggedPassword.isEmpty()){
+                            out.println("<p>Enter your password</p>");
+                        }
+                    }
+                }
+                if(user.getPassword().equals(request.getParameter("password"))){
+                    session.setAttribute("user", user);
+                    request.getServletContext().getRequestDispatcher("/products.jsp").forward(request,response);
+                    ArrayList<User> users = (ArrayList<User>) session.getAttribute("user");
+                }
+                else {
+                    request.getServletContext().getRequestDispatcher("/login.jsp").forward(request, response);
+                }
+            }
+        else if(action.equals("logout") ){
+            request.getServletContext().getRequestDispatcher("/index.jsp").forward(request, response);
+            session.invalidate();
+        }
     }
-    }
+            
+       
+        
 
 
     /**

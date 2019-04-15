@@ -15,11 +15,8 @@
     </head>
     <body>
         <h1>Sign-up form</h1>
-        <%--        <c:if test="${requestScope.error!=null}">
-            <label>Error:</label>
-            <span>${requestScope.error}</span><br />
-        </c:if> --%>
-            <form action="membership?action=signup" method="post">
+
+            <form action="/Project/membership?action=signup" method="post">
                 <input type="hidden" name="action" value="add">        
                 <label class="pad_top">First Name</label>
                 <input type="text" name="fName" required><br>

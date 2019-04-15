@@ -11,12 +11,11 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Login</title>
         <link rel="stylesheet" href="style.css"/>
-        <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     </head>
     <body>
         <h1>Login</h1>
         <br/>  
-        <form action="membership?action=login" method="post">  
+        <form action="/Project/membership?action=login" method="post">  
             <label for="email">Email:</label>  
             <input type="text" name="email"/>  <br />
             <label for="password">Password:</label>  

@@ -68,8 +68,7 @@ public class ProductManagementServlet extends HttpServlet {
                 case "displayProducts":
                     getServletContext().getRequestDispatcher("/products.jsp").forward(request, response);
                     break;
-//                    url = "/products.jsp";
-//                    break;
+
                 case "addProduct":
                 {
                    HttpSession session = request.getSession();

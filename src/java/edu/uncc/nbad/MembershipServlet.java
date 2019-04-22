@@ -20,7 +20,7 @@ import javax.servlet.http.HttpSession;
 
 /**
  *
- * @author tyler, austin
+ * @author tyler
  */
 public class MembershipServlet extends HttpServlet {
 
@@ -100,47 +100,40 @@ public class MembershipServlet extends HttpServlet {
         
         String action = request.getParameter("action");
         HttpSession session = request.getSession();
+        String url;
         
         if(action.equals("signup")){
-            
-        User user = new User();
-            
-        String fName = request.getParameter("fName");
-        String lName = request.getParameter("lName");
-        String email = request.getParameter("email");
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
         
-        user.setfName(fName);
-        user.setlName(lName);
-        user.setEmail(email);
-        user.setUsername(username);
-        user.setPassword(password);
-        
-        if(fName.isEmpty() || lName.isEmpty() || (email.isEmpty() || !(email.contains("@")))){
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet MembershipControllerServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Membership Servlet</h1>");
-            if(fName.isEmpty()){
-                out.println("<p>Enter a first name.</p>");
-            }
-            if(lName.isEmpty()){
-                out.println("<p>Enter a last name.</p>");
-            }
-            if(email.isEmpty() || !(email.contains("@"))){
-                out.println("<p>Enter a valid email address.</p>");
+            String fName = request.getParameter("fName");
+            String lName = request.getParameter("lName");
+            String email = request.getParameter("email");
+            String username = request.getParameter("username");
+            String password = request.getParameter("password");
                 
+        if(fName.isEmpty() || lName.isEmpty() || (email.isEmpty() || !(email.contains("@")))){
+            try (PrintWriter out = response.getWriter()) {
+                /* TODO output your page here. You may use following sample code. */
+                out.println("<!DOCTYPE html>");
+                out.println("<html>");
+                out.println("<head>");
+                out.println("<title>Servlet MembershipControllerServlet</title>");
+                out.println("</head>");
+                out.println("<body>");
+                out.println("<h1>Membership Servlet</h1>");
+                if(fName.isEmpty()){
+                    out.println("<p>Enter a first name.</p>");
+                }
+                if(lName.isEmpty()){
+                    out.println("<p>Enter a last name.</p>");
+                }
+                if(email.isEmpty() || !(email.contains("@"))){
+                    out.println("<p>Enter a valid email address.</p>");
+
+                }
+                out.println("</body>");
+                out.println("</html>");
+
             }
-            out.println("</body>");
-            out.println("</html>");
-            
-        }
         }
         else if(username.isEmpty() || password.length() <= 8){
             try (PrintWriter out = response.getWriter()){
@@ -160,23 +153,27 @@ public class MembershipServlet extends HttpServlet {
                 out.println("</body>");
                 out.println("</html>");
             }
-        }
-        
-    
-            session.setAttribute("user", user);
-            request.getServletContext().getRequestDispatcher("/login.jsp").forward(request, response);
             
+        }
+            User user = new User();
+
+            user.setfName(fName);
+            user.setlName(lName);
+            user.setEmail(email);
+            user.setUsername(username);
+            user.setPassword(password);
+        
+            UserTable.addRecord(user);
+            session.setAttribute("user", user);
+            url = "/login.jsp";
+            getServletContext().getRequestDispatcher(url).forward(request, response);
+                        
         }else if(action.equals("login")){
             
-                
-             
-                User loggedUser = new User();
                 String loggedEmail = request.getParameter("email");
                 String loggedPassword = request.getParameter("password");
                 
-                
-                
-                User user = (User)session.getAttribute("user");
+                User user = UserTable.getUser(loggedEmail);
                 if(loggedEmail.isEmpty() || loggedPassword.isEmpty()) {
                     try (PrintWriter out = response.getWriter()){
                         out.println("<!DOCTYPE html>");
@@ -196,10 +193,8 @@ public class MembershipServlet extends HttpServlet {
                 }
                 if(user.getPassword().equals(request.getParameter("password"))){
                     session.setAttribute("user", user);
-                    ArrayList<Product> productList = (ArrayList<Product>) ProductTable.selectProducts();
-                    session.setAttribute("products", productList);
                     request.getServletContext().getRequestDispatcher("/products.jsp").forward(request,response);
-                    //ArrayList<User> users = (ArrayList<User>) session.getAttribute("user");
+                    ArrayList<User> users = (ArrayList<User>) session.getAttribute("user");
                 }
                 else {
                     request.getServletContext().getRequestDispatcher("/login.jsp").forward(request, response);

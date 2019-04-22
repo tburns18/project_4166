@@ -8,6 +8,7 @@ package edu.uncc.nbad;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -15,6 +16,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.jstl.sql.Result;
+import javax.servlet.jsp.jstl.sql.ResultSupport;
 
 /**
  *
@@ -65,20 +68,24 @@ public class ProductManagementServlet extends HttpServlet {
         String url;
        
             switch (action) {
-                case "displayProducts":
+                case "displayProducts": {
+                    HttpSession session = request.getSession();
+                    session.removeAttribute("products");
+                    ArrayList<Product> productList = (ArrayList<Product>) ProductTable.selectProducts();
+                    
+                    session.setAttribute("products", productList);
                     getServletContext().getRequestDispatcher("/products.jsp").forward(request, response);
+                    }
                     break;
 
-                case "addProduct":
-                {
-                   HttpSession session = request.getSession();
+                case "addProduct": {
+                    HttpSession session = request.getSession();
                     session.removeAttribute("product");
-                System.out.println(" forwarding to new product");
-                getServletContext().getRequestDispatcher("/product.jsp").forward(request, response);
-                }
+                    System.out.println(" forwarding to new product");
+                    getServletContext().getRequestDispatcher("/addProduct.jsp").forward(request, response);
+                    }
                     break;
-                case "updateProduct":
-                {
+                case "updateProduct": {
                     String code = request.getParameter("itemCode");
                     HttpSession session = request.getSession();
                     ArrayList<Product> products = (ArrayList<Product>) session.getAttribute("products");
@@ -87,12 +94,10 @@ public class ProductManagementServlet extends HttpServlet {
                             session.setAttribute("product", p);
                         }
                     }
-                    getServletContext().getRequestDispatcher("/product.jsp").forward(request, response);
- 
-            }
+                    getServletContext().getRequestDispatcher("/updateProduct.jsp").forward(request, response);
+                    }
                     break;
-                case "deleteProduct":
-                {
+                case "deleteProduct": {
                     String code = request.getParameter("itemCode");
                     HttpSession session = request.getSession();
                     ArrayList<Product> products = (ArrayList<Product>) session.getAttribute("products");
@@ -105,26 +110,26 @@ public class ProductManagementServlet extends HttpServlet {
                         }
                     }
                     getServletContext().getRequestDispatcher("/products.jsp").forward(request, response);
-                }
-                break;
+                    }
+                    break;
                 
                 case "actuallyDelete":
                     System.out.println("Requested to Delete" + request.getParameter("itemCode"));
                     {
                         String code = request.getParameter("itemCode");
                         HttpSession session = request.getSession();
-                        ArrayList<Product> products = (ArrayList<Product>) session.getAttribute("products");
-                        for(Product p: products) {
-                            if(p.getItemCode().equals(code)){
-                                products.remove(p);
-                                session.removeAttribute("products");
-                                session.setAttribute("products", products);
-                                break;
-                            }
-                        }
+                        
+                        // Delete product from database
+                        Product product = new Product();
+                        product.setItemCode(code);
+                        ProductTable.deleteProduct(product);
+
+                        ArrayList<Product> productList = (ArrayList<Product>) ProductTable.selectProducts();
+
+                        session.removeAttribute("products");
+                        session.setAttribute("products", productList);
                         getServletContext().getRequestDispatcher("/products.jsp").forward(request, response);
                     }
-
                     break;
                 default:
                     break;
@@ -164,13 +169,14 @@ public class ProductManagementServlet extends HttpServlet {
         switch (action) {
             case "addProduct":
                 {
-                    //Get the the values to put into the new product
+                    // Get the the values to put into the new product
                     String code = request.getParameter("code");
                     String desc = request.getParameter("desc");
                     String price = request.getParameter("price");
                     double numPrice = 0;
+                    boolean alreadyExists = ProductTable.exists(code);
                     
-                    if(code.isEmpty() || desc.isEmpty() || price.isEmpty() || desc.trim().isEmpty()){
+                    if(code.isEmpty() || desc.isEmpty() || price.isEmpty() || desc.trim().isEmpty() || alreadyExists){
                         response.setContentType("text/html;charset=UTF-8");
                         try (PrintWriter out = response.getWriter()){
                             response.setContentType("text/html");
@@ -182,8 +188,12 @@ public class ProductManagementServlet extends HttpServlet {
                             out.println("<h1>ERROR! Make sure all fields are filled out!</h1>");
                             out.println("<h2>The following entries are invalid: </h2>");
                             out.println("<body>");
-                            if(code.isEmpty()) {
-                                out.println("<p>Code</p>");
+                            if(code.isEmpty() || alreadyExists) {
+                                if(alreadyExists){
+                                    out.println("<p>Code: product with code " + code + " already exists!</p>");
+                                } else {
+                                    out.println("<p>Code</p>");
+                                }
                             }
                             if(desc.isEmpty() || desc.trim().isEmpty()) {
                                 out.println("<p>Description</p>");
@@ -194,8 +204,7 @@ public class ProductManagementServlet extends HttpServlet {
                             out.println("</body>");
                             out.println("</html>");
                         }
-                    }
-                    else if(!price.isEmpty()){
+                    } else if (!price.isEmpty()){
                         numPrice = Double.parseDouble(price);
                         if(numPrice<0){
                             response.setContentType("text/html;charset=UTF-8");
@@ -214,32 +223,108 @@ public class ProductManagementServlet extends HttpServlet {
                                 out.println("</body>");
                                 out.println("</html>");
                             }
-                        }
-                        else{
-                            //Create new product object and put in the values
+                        } else {
+                            // Create new product object and put in the values
                             Product newProduct = new Product();
                             newProduct.setItemCode(code);
                             newProduct.setItemDescription(desc);
                             newProduct.setItemPrice(numPrice);
-                            //get the product list from the session, if any
-                            HttpSession session = request.getSession();
-                            ArrayList<Product> products = (ArrayList<Product>) session.getAttribute("products");
-                            if(products==null) {
-                                products =  new ArrayList<>();
+                            
+                            // Add the new product to the database
+                            ProductTable.insertProduct(newProduct);
 
-                            }       //add product to list
-                            products.add(newProduct);
-                            // replacing the old list in the session by a the new list (that contains the new product we just added)
+                            HttpSession session = request.getSession();
+                            ArrayList<Product> productList = (ArrayList<Product>) ProductTable.selectProducts();
+                    
+                            // Replace the old list in the session with the new list (that contains the new product we just added)
                             session.removeAttribute("products");
-                            session.setAttribute("products", products);
-                            //Redirect back to products page
+                            session.setAttribute("products", productList);
+                            // Redirect back to products page
                         }
                     }
-                    
                 }
-            getServletContext().getRequestDispatcher("/products.jsp").forward(request, response);
-            break;
+                getServletContext().getRequestDispatcher("/products.jsp").forward(request, response);
+                break;
             
+            case "updateProduct":
+                {
+                    // Get the the values to put into the new product
+                    String code = request.getParameter("code");
+                    String desc = request.getParameter("desc");
+                    String price = request.getParameter("price");
+                    double numPrice = 0;
+                    boolean alreadyExists = ProductTable.exists(code);
+                    
+                    if(code.isEmpty() || desc.isEmpty() || price.isEmpty() || desc.trim().isEmpty() || !alreadyExists){
+                        response.setContentType("text/html;charset=UTF-8");
+                        try (PrintWriter out = response.getWriter()){
+                            response.setContentType("text/html");
+                            out.println("<!DOCTYPE html>");
+                            out.println("<html>");
+                            out.println("<head>");
+                            out.println("<title>Servlet MembershipServlet</title>");            
+                            out.println("</head>");
+                            out.println("<h1>ERROR! Make sure all fields are filled out!</h1>");
+                            out.println("<h2>The following entries are invalid: </h2>");
+                            out.println("<body>");
+                            if(code.isEmpty() || !alreadyExists) {
+                                if(!alreadyExists){
+                                    out.println("<p>Code: product with code " + code + " does not exist!</p>");
+                                } else {
+                                    out.println("<p>Code</p>");
+                                }
+                            }
+                            if(desc.isEmpty() || desc.trim().isEmpty()) {
+                                out.println("<p>Description</p>");
+                            }
+                            if(price.isEmpty()) {
+                                out.println("<p>Price</p>");
+                            }
+                            out.println("</body>");
+                            out.println("</html>");
+                        }
+                    } else if (!price.isEmpty()){
+                        numPrice = Double.parseDouble(price);
+                        if(numPrice<0){
+                            response.setContentType("text/html;charset=UTF-8");
+                                try (PrintWriter out = response.getWriter()) {
+                            /* TODO output your page here. You may use following sample code. */
+                                response.setContentType("text/html");
+                                out.println("<!DOCTYPE html>");
+                                out.println("<html>");
+                                out.println("<head>");
+                                out.println("<title>Servlet MembershipServlet</title>");            
+                                out.println("</head>");
+                                out.println("<h1>ERROR! Make sure all fields are filled out!</h1>");
+                                out.println("<h2>The following entries are invalid: </h2>");
+                                out.println("<body>");
+                                out.println("<p>Price must be greater than 0</p>");
+                                out.println("</body>");
+                                out.println("</html>");
+                            }
+                        } else {
+                            // Create new product object and put in the values
+                            Product newProduct = new Product();
+                            newProduct.setItemCode(code);
+                            newProduct.setItemDescription(desc);
+                            newProduct.setItemPrice(numPrice);
+                            
+                            // Update the product in the database
+                            ProductTable.updateProduct(newProduct);
+                            
+                            HttpSession session = request.getSession();
+                            ArrayList<Product> productList = (ArrayList<Product>) ProductTable.selectProducts();
+                    
+                            // Replace the old list in the session with the new list (that contains the product we just updated)
+                            session.removeAttribute("products");
+                            session.setAttribute("products", productList);
+                            // Redirect back to products page
+                        }
+                    }
+                }
+                getServletContext().getRequestDispatcher("/products.jsp").forward(request, response);
+                break;    
+                
             default:
                 System.err.println("Error");
                 break;

@@ -1,7 +1,7 @@
 <%-- 
-    Document   : product
-    Created on : Feb 20, 2019, 11:19:07 AM
-    Author     : tyler
+    Document   : updateProduct
+    Created on : April 22, 2019
+    Author     : austin
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -31,13 +31,12 @@
         <form action="productManagement" method="post">
             <p>    
                 <label class="leftHeading">Code</label>
-                <input type="text" name="code" value="<c:out value="${product.itemCode}"/>">
+                <input type="text" readonly="readonly" name="code" value="<c:out value="${product.itemCode}"/>">
             </p>
 
             <p>
                 <label class="leftHeading">Description</label>
-                <textarea rows="4" cols="25" name="desc"> <c:out value="${product.itemDescription}"/>
-                </textarea>
+                <textarea rows="4" cols="25" name="desc"><c:out value="${product.itemDescription}"/></textarea>
             </p>
 
             <p>
@@ -46,8 +45,8 @@
             </p>
 
             <div class="rightButton">
-                <input type="hidden" name="action" value="addProduct">          
-                <input type="submit" value="Add Product">
+                <input type="hidden" name="action" value="updateProduct">          
+                <input type="submit" value="Update Product">
 
             </div>
         </form>

@@ -20,7 +20,7 @@ import javax.servlet.http.HttpSession;
 
 /**
  *
- * @author tyler
+ * @author tyler, austin
  */
 public class MembershipServlet extends HttpServlet {
 
@@ -196,8 +196,10 @@ public class MembershipServlet extends HttpServlet {
                 }
                 if(user.getPassword().equals(request.getParameter("password"))){
                     session.setAttribute("user", user);
+                    ArrayList<Product> productList = (ArrayList<Product>) ProductTable.selectProducts();
+                    session.setAttribute("products", productList);
                     request.getServletContext().getRequestDispatcher("/products.jsp").forward(request,response);
-                    ArrayList<User> users = (ArrayList<User>) session.getAttribute("user");
+                    //ArrayList<User> users = (ArrayList<User>) session.getAttribute("user");
                 }
                 else {
                     request.getServletContext().getRequestDispatcher("/login.jsp").forward(request, response);

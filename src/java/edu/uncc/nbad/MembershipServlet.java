@@ -193,6 +193,12 @@ public class MembershipServlet extends HttpServlet {
                 }
                 if(user.getPassword().equals(request.getParameter("password"))){
                     session.setAttribute("user", user);
+
+                    // Replace the old list in the session with the new list (that contains the new product we just added)
+                    ArrayList<Product> productList = (ArrayList<Product>) ProductTable.selectProducts();
+                    session.removeAttribute("products");
+                    session.setAttribute("products", productList);
+                    
                     request.getServletContext().getRequestDispatcher("/products.jsp").forward(request,response);
                     ArrayList<User> users = (ArrayList<User>) session.getAttribute("user");
                 }

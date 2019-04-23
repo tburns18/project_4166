@@ -20,7 +20,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 public class UserTable {
     
     static String url = "jdbc:mysql://localhost:3306/shop";
-    static String user = "UserTable";
+    static String user = "ProductTable";
     static String password = "password";
     
     
@@ -118,6 +118,24 @@ public class UserTable {
     }
 
     public static HashMap<String, User> getUsersMap() throws IOException {
-		throw new NotImplementedException(); // remove this line and implement the logic
+        String SQL = "SELECT * FROM  'users'";
+        HashMap<String, User> users = new HashMap<String, User>();
+        try{
+            preparedStatement = connection.prepareStatement(SQL);
+            resultset = preparedStatement.executeQuery();
+            
+            while(resultset.next()){
+                User u = new User();
+                u.setEmail(resultset.getString("email"));
+                u.setfName(resultset.getString("firstName"));
+                u.setlName(resultset.getString("lastName"));
+                u.setPassword(resultset.getString("password"));
+                users.put(u.getEmail(), u);
+            }
+            
+        }catch (SQLException e) {
+            System.out.println("Exception thrown: " + e);
+        }
+        return users;
     }
 }

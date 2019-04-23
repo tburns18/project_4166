@@ -179,16 +179,17 @@ public class ProductTable {
         }
     }
     
-    public static void main(String[] args) {
-        ArrayList<Product> productList = (ArrayList<Product>) selectProducts();
+    // For testing purposes only
+    /*    public static void main(String[] args) {
+    ArrayList<Product> productList = (ArrayList<Product>) selectProducts();
     
-        if(productList == null){
-            System.out.println("Null");
-            System.exit(0);
-        }
-    
-        for (Product p : productList){
-            System.out.println(p.getItemCode() + ", " + p.getItemDescription() + ", " + p.getPriceCurrencyFormat());
-        }
+    if(productList == null){
+    System.out.println("Null");
+    System.exit(0);
     }
+    
+    for (Product p : productList){
+    System.out.println(p.getItemCode() + ", " + p.getItemDescription() + ", " + p.getPriceCurrencyFormat());
+    }
+    }*/
 }
